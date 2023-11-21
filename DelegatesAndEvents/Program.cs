@@ -6,20 +6,46 @@
 
     public delegate string OtherBroadcastDelegate(string message);
 
+    public delegate void BroadcastMessage(string message);
+
     internal class Program
     {
         static void Main(string[] args)
         {
+            // (..parameters..) => { ... code ... }
+
+
+            SumDelegate sumFunction = (a, b) => a + b;
+            BroadcastMessage messageDelegate = message => Console.WriteLine(message);
+
+            int sumResult = sumFunction(1, 2);
+            Console.WriteLine(sumResult);
+            
+
+            int[] result1 = ArrayHelper.Sum(
+                new[] { 1, 2, 3 },
+                new[] { 4, 5, 6 },
+                (a, b) => a + b);
+
+            string[] result2 = ArrayHelper.Sum(
+                new[] { "test", "other" },
+                new[] { "1", "2" },
+                (txt1, txt2) => string.Concat(txt1, txt2));
+
+            BroadcastMessage messagePublisherDelegate = null;
+            messagePublisherDelegate += BroadcastMessageReceived;
+            messagePublisherDelegate("Test message (delegate)");
+
+            Action<string> messagePublisherDelegate2 = BroadcastMessageReceived;
+            messagePublisherDelegate2("Test message (action delegate)");
+
+            MessagePublisher messagePublisherObject = new MessagePublisher();
+            messagePublisherObject.OnMessageReceivedEvent += BroadcastMessageReceived;
+            // messagePublisherObject.OnMessageReceivedDelegate += BroadcastMessageReceived;
+            messagePublisherObject.SendMessage("Test message (event)");
+
+
             /*
-            SumDelegate sumFunction = delegate (int a, int b)
-            {
-                return a + b;
-            };
-
-            int result = sumFunction(1, 2);
-            Console.WriteLine(result);
-            */
-
             BroadcastDelegate broadcaster = null;
             broadcaster += MessageReceiver2;
             broadcaster += MessageReceiver1;
@@ -50,6 +76,7 @@
             }
 
             Console.WriteLine("All invocations result=" + string.Join(", ", allResults));
+            */
         }
 
         private static int Dif(int a, int b)
@@ -70,6 +97,11 @@
             string echo = $"Receiver2: {message}";
             Console.WriteLine(echo);
             return echo;
+        }
+
+        private static void BroadcastMessageReceived(string mesasge)
+        {
+            Console.WriteLine($"Received broadcast message: {mesasge}");
         }
     }
 }
